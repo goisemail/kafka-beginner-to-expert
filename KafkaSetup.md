@@ -27,6 +27,17 @@ docker exec -it kafka kafka-console-consumer.sh --topic ismail-topic --bootstrap
 give ctrl + C to close it
 
 
+## Describe a Topic :
+ docker exec -it kafka kafka-topics.sh --describe --topic ismail-topic --bootstrap-server localhost:9092
+
+## Listing a Topic :
+docker exec -it kafka kafka-topics.sh --list --bootstrap-server localhost:9092
+
+## Deleting a Topic
+docker exec -it kafka kafka-topics.sh --delete --topic my-topic --bootstrap-server localhost:9092
+
+
+
 
 
 
