@@ -56,26 +56,6 @@ Keep this file brief and to the point — not a detailed explanation.
 
 ---
 
-## ⚙️ Producer Internals
-
-- **acks=0,1,all** determine delivery guarantees.
-- **Idempotent producers** ensure exactly-once semantics (EOS).
-- Batching and compression improve throughput.
-- `linger.ms` and `batch.size` tune latency vs performance.
-- **Key-based partitioning** ensures ordering per key.
-
----
-
-## 🧠 Consumer Internals
-
-- Consumers join **consumer groups** for parallel consumption.
-- **Offsets** track progress — auto or manual commit.
-- **Rebalancing** redistributes partitions among consumers.
-- `enable.auto.commit=false` gives precise control.
-- Offset retention controlled by `offsets.retention.minutes`.
-
----
-
 ## 🧱 Kafka Internals
 
 - Messages stored in **segment files** (append-only logs).
@@ -83,6 +63,66 @@ Keep this file brief and to the point — not a detailed explanation.
 - **Retention** policy: time-based or size-based cleanup.
 - **Compaction** keeps latest key-value per key.
 - **ISR (In-Sync Replicas)** ensure data reliability.
+
+---
+
+## 🏗️ Kafka Architecture & Coordination (Zookeeper vs KRaft)
+
+**Cluster Structure**
+- Kafka cluster = multiple brokers (servers) storing topic partitions.  
+- Each partition → one leader + N followers (replicas).  
+- **Controller** = broker responsible for leader elections and metadata sync.
+
+**Zookeeper Mode (Legacy)**
+- External coordination service on **port 2181**.  
+- Brokers register with Zookeeper; ZK stores metadata & partition leadership.  
+- Clients (producers/consumers) connect only to brokers (9092); brokers query Zookeeper for metadata.  
+- Requires two services → Zookeeper + Kafka broker.
+
+**KRaft Mode (Modern)**
+- Zookeeper removed — Kafka includes its own controller process.  
+- Each broker has a **controller listener (9093+)** for internal metadata sync.  
+- Controllers form a **Raft quorum** (majority ack = metadata commit).  
+- Brokers replicate metadata from controllers internally.  
+- Clients still connect only to **brokers (9092)**.  
+- Simplified deployment → no external Zookeeper.
+
+**Ports Summary**
+| Mode | Component | Port | Purpose |
+|------|------------|------|----------|
+| Zookeeper Mode | Zookeeper | 2181 | Cluster coordination & leader election |
+| Zookeeper Mode | Broker | 9092 | Producer/Consumer connections |
+| KRaft Mode | Broker | 9092 | Producer/Consumer connections |
+| KRaft Mode | Controller | 9093 | Raft metadata communication |
+
+**Raft Consensus Quick Facts**
+- Metadata changes → written to Raft log then replicated.  
+- Quorum ack required (3 controllers → 2 acks minimum).  
+- Ensures strong consistency and fault tolerance.  
+- Replaces Zookeeper leader election mechanism.
+
+**Parallelism & Scalability**
+- **Partitions** enable parallel reads/writes.  
+- Producers write to multiple partitions → parallel I/O.  
+- Consumers in a group each read different partitions → parallel processing.  
+- Linear scaling by increasing partitions and brokers.
+
+**Visualization Hint (for GitHub .md)**
+```mermaid
+flowchart LR
+    subgraph KRAFT["Kafka Cluster (KRaft Mode)"]
+        direction TB
+        subgraph B1["Broker 1 (9092, Controller 9093)"]
+        end
+        subgraph B2["Broker 2 (9094, Controller 9095)"]
+        end
+        subgraph B3["Broker 3 (9096, Controller 9097)"]
+        end
+        B1 <--> B2 <--> B3
+    end
+    P[Producer] --> B1
+    C[Consumer] --> B2
+```
 
 ---
 
@@ -118,6 +158,9 @@ Keep this file brief and to the point — not a detailed explanation.
 - **Controller**: manages leader election and metadata.
 - **Zookeeper/KRaft**: metadata management (KRaft replacing Zookeeper).
 - **Replication factor** controls fault tolerance.
+- **KRaft** = built-in controller quorum replacing Zookeeper.  
+- **Controller port 9093+** handles Raft metadata replication.  
+- **Clients** use only broker ports (9092).  
 
 ---
 

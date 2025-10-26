@@ -4,3 +4,4 @@
 - Sequential Disk Writes — How Kafka Achieves It , For HDD & SSD, to be learned depth later
 - Zero-Copy Transfer (sendfile syscall), to be learned depth later.
 - Investigate KRaft internals replacing Zookeeper.
+- This works exactly like Raft in databases or etcd.
