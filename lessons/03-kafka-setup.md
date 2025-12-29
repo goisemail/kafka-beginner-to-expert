@@ -73,14 +73,15 @@ docker run -d --name kafka-kraft --network kafka-net   -p 9092:9092 -p 9093:9093
 ```
 
 **Explanation:**
-| Env Var | Description |
-|----------|--------------|
-| `KAFKA_CFG_PROCESS_ROLES` | Defines roles — both broker and controller. |
-| `KAFKA_CFG_NODE_ID` | Unique node ID in the cluster. |
-| `KAFKA_CFG_CONTROLLER_QUORUM_VOTERS` | Controller nodes participating in Raft quorum. |
-| `KAFKA_CFG_LISTENERS` | Defines ports for broker (9092) and controller (9093). |
-| `KAFKA_CFG_CONTROLLER_LISTENER_NAMES` | Indicates which listener is for the controller. |
-| `ALLOW_PLAINTEXT_LISTENER` | Enables plaintext connection (non-SSL). |
+
+| Env Var                               | Description                                            |
+|---------------------------------------|--------------------------------------------------------|
+| `KAFKA_CFG_PROCESS_ROLES`             | Defines roles — both broker and controller.            |
+| `KAFKA_CFG_NODE_ID`                   | Unique node ID in the cluster.                         |
+| `KAFKA_CFG_CONTROLLER_QUORUM_VOTERS`  | Controller nodes participating in Raft quorum.         |
+| `KAFKA_CFG_LISTENERS`                 | Defines ports for broker (9092) and controller (9093). |
+| `KAFKA_CFG_CONTROLLER_LISTENER_NAMES` | Indicates which listener is for the controller.        |
+| `ALLOW_PLAINTEXT_LISTENER`            | Enables plaintext connection (non-SSL).                |
 
 ### 3️⃣ Verify Setup
 ```bash
@@ -128,10 +129,10 @@ docker exec -it kafka-kraft kafka-topics.sh   --delete --topic kraft-topic --boo
 ## 🧱 Optional — Multi-Broker KRaft Setup
 
 | Container | Broker Port | Controller Port |
-|------------|--------------|-----------------|
-| kafka-1 | 9092 | 9093 |
-| kafka-2 | 9094 | 9095 |
-| kafka-3 | 9096 | 9097 |
+|-----------|-------------|-----------------|
+| kafka-1   | 9092        | 9093            |
+| kafka-2   | 9094        | 9095            |
+| kafka-3   | 9096        | 9097            |
 
 Each broker needs:
 ```bash
@@ -143,15 +144,15 @@ Each broker needs:
 
 ## 💡 Comparison Summary
 
-| Feature | Zookeeper Setup | KRaft Setup |
-|----------|------------------|--------------|
-| Coordination | External (Zookeeper 2181) | Internal (Raft quorum 9093+) |
-| Services | 2 (Zookeeper + Kafka) | 1 (Kafka only) |
-| Startup Complexity | Higher | Simpler |
-| Metadata Storage | Zookeeper znodes | Raft metadata log |
-| Leader Election | Via Zookeeper | Internal Raft consensus |
-| Introduced | Legacy (pre-2.8) | Kafka 2.8+ (default ≥3.5) |
-| Recommended | ❌ Deprecated | ✅ Preferred |
+| Feature            | Zookeeper Setup           | KRaft Setup                    |
+|--------------------|---------------------------|--------------------------------|
+| Coordination       | External (Zookeeper 2181) | Internal (Raft quorum 9093+)   |
+| Services           | 2 (Zookeeper + Kafka)     | 1 (Kafka only)                 |
+| Startup Complexity | Higher                    | Simpler                        |
+| Metadata Storage   | Zookeeper nodes           | Raft metadata log              |
+| Leader Election    | Via Zookeeper             | Internal Raft consensus        |
+| Introduced         | Legacy (pre-2.8)          | Kafka 2.8+ (default ≥3.5)      |
+| Recommended        | ❌ Deprecated              | ✅ Preferred                    |
 
 ---
 

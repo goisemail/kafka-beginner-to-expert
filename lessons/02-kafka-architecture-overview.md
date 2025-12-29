@@ -13,7 +13,7 @@
 ## 🧱 1️⃣ Kafka Core Components Overview
 
 | Component | Role | Description |
-|------------|------|-------------|
+|:-----------|------|-------------|
 | **Producer** | Publishes data to topics. |
 | **Consumer** | Reads data from topics. |
 | **Broker** | Kafka server that stores and serves topic partitions. |
